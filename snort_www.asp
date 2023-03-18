@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>Suricata Statistics</title>
+<title>Snort Statistics</title>
 <link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <style>
@@ -23,7 +23,7 @@ font-weight: bolder;
   text-align: left;
   outline: none;
   cursor: pointer;
-}	
+}
 
 th.keystatsnumber {
   font-size: 20px !important;
@@ -78,9 +78,9 @@ th.keystatsnumber {
 <script language="JavaScript" type="text/javascript" src="/tmmenu.js"></script>
 <script language="JavaScript" type="text/javascript" src="/client_function.js"></script>
 <script language="JavaScript" type="text/javascript" src="/validator.js"></script>
-<script language="JavaScript" type="text/javascript" src="/ext/suricata_stats.sh/suricatastatstitle.js"></script>
-<script language="JavaScript" type="text/javascript" src="/ext/suricata_stats.sh/suricatastats.js"></script>
-<script language="JavaScript" type="text/javascript" src="/ext/suricata_stats.sh/suricatahits.js"></script>
+<script language="JavaScript" type="text/javascript" src="/ext/snort_stats.sh/snortstatstitle.js"></script>
+<script language="JavaScript" type="text/javascript" src="/ext/snort_stats.sh/snortstats.js"></script>
+<script language="JavaScript" type="text/javascript" src="/ext/snort_stats.sh/snorthits.js"></script>
 
 
 <script>
@@ -91,21 +91,21 @@ function filterData(chartInstance) {
 	var datasets = chartInstance.data.datasets;
 	var originalDatasets = chartInstance.data.allData;
 	var chartOptions = chartInstance.options.scales.xAxes[0];
-	
+
 	var startX = chartOptions.time.min;
 	var endX = chartOptions.time.max;
 	if(typeof originalDatasets === 'undefined' || originalDatasets === null) { return; }
 	for(var i = 0; i < originalDatasets.length; i++) {
 		var dataset = datasets[i];
 		var originalData = originalDatasets[i];
-		
+
 		if (!originalData.length) break
-		
+
 		var s = startX;
 		var e = endX;
 		var sI = null;
 		var eI = null;
-		
+
 		for (var j = 0; j < originalData.length; j++) {
 			if ((sI==null) && originalData[j].x > s) {
 				sI = j;
@@ -117,7 +117,7 @@ function filterData(chartInstance) {
 		if (sI==null) sI = 0;
 		if (originalData[originalData.length - 1].x < s) eI = 0
 			else if (eI==null) eI = originalData.length
-		
+
 		dataset.data = originalData.slice(sI, eI);
 	}
 }
@@ -427,15 +427,15 @@ function RedrawAllCharts() {
 }
 function GetCookie(cookiename) {
 	var s;
-	if ((s = cookie.get("suricata_"+cookiename)) != null) {
-		return cookie.get("suricata_"+cookiename);
+	if ((s = cookie.get("snort_"+cookiename)) != null) {
+		return cookie.get("snort_"+cookiename);
 	}
 	else {
 		return "";
 	}
 }
 function SetCookie(cookiename,cookievalue) {
-	cookie.set("suricata_"+cookiename, cookievalue, 31);
+	cookie.set("snort_"+cookiename, cookievalue, 31);
 }
 
 function GetCookieNew(cookiename,default_value) {
@@ -457,7 +457,7 @@ function SetCurrentPage(){
 function initial(){
 	SetCurrentPage();
 	show_menu();
-	SetSuricataStatsTitle();
+	SetSnortStatsTitle();
 
 	// redraw the Threats graphs
 	var startDate = new Date();
@@ -472,7 +472,7 @@ function initial(){
 	$("thead").click(function(){
 		$(this).siblings().toggle("fast");
 	})
-	
+
 	$(".default-collapsed").trigger("click");
 }
 
@@ -507,7 +507,7 @@ function reload() {
 }
 
 function applyRule() {
-	var action_script_tmp = "start_suricata_stats.sh";
+	var action_script_tmp = "start_snort_stats.sh";
 	document.form.action_script.value = action_script_tmp;
 	var restart_time = document.form.action_wait.value*1;
 	showLoading();
@@ -727,13 +727,13 @@ function getChartType(e) {
 
 function getSDev(datasetname){
 	var avg = getAvg(datasetname);
-	
+
 	var squareDiffs = datasetname.map(function(value){
 		var diff = value - avg;
 		var sqrDiff = diff * diff;
 		return sqrDiff;
 	});
-	
+
 	var avgSquareDiff = getAvg(squareDiffs);
 	var stdDev = Math.sqrt(avgSquareDiff);
 	return stdDev;
@@ -744,12 +744,12 @@ function getMax(datasetname) {
 }
 function getAvg(datasetname) {
 	var sum, avg = 0;
-	
+
 	if (datasetname.length) {
 		sum = datasetname.reduce(function(a, b) { return a*1 + b*1; });
 		avg = sum / datasetname.length;
 	}
-	
+
 	return avg;
 }
 
@@ -787,7 +787,7 @@ function ZoomPanMax(charttype, axis, datasetname) {
 <div id="Loading" class="popup_bg"></div>
 <iframe name="hidden_frame" id="hidden_frame" src="about:blank" width="0" height="0" frameborder="0"></iframe>
 <form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
-<input type="hidden" name="action_script" value="start_suricata_stats.sh">
+<input type="hidden" name="action_script" value="start_snort_stats.sh">
 <input type="hidden" name="current_page" value="">
 <input type="hidden" name="next_page" value="">
 <input type="hidden" name="modified" value="0">
@@ -814,7 +814,7 @@ function ZoomPanMax(charttype, axis, datasetname) {
 <tr bgcolor="#4D595D">
 <td valign="top">
 <div style="line-height:10px;">&nbsp;</div>
-<div class="formfonttitle" id="suricatastatstitle">Suricata Statistics</div>
+<div class="formfonttitle" id="snortstatstitle">Snort Statistics</div>
 <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" style="border:0px;">
 <tr class="apply_gen" valign="top" height="35px">
 <td style="background-color:rgb(77, 89, 93);border:0px;">
@@ -870,7 +870,7 @@ function ZoomPanMax(charttype, axis, datasetname) {
 	</tr>
 	</thead>
 
-	<tr id="DatadivTableThreats" />	
+	<tr id="DatadivTableThreats" />
 </table>
 </td>
 </tr>

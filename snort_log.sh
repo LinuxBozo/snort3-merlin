@@ -46,18 +46,19 @@ if [ -f "$snort_csv" ]; then # only if log exists
   echo "Processing..."
   # process reply logs - for top daily replies table
   echo "BEGIN;" > $tmpSQL
-  cat $snort_csv | tr -d ' ' | awk -F',' '{ printf "INSERT OR IGNORE INTO threat_log ([threat_id],[threat_desc],[threat_class],[threat_priority],[threat_src_ip],[threat_dst_ip],[date],[count]) VALUES (\x27%s\x27, \x27%s\x27, \x27%s\x27, \x27%s\x27, \x27%s\x27, \x27%s\x27, \x27%s\x27, 0);\n",$1,$2,$3,$4,$5,$6,$7;printf "UPDATE threat_log SET count = count + 1 WHERE threat_id = \x27%s\x27 AND threat_src_ip = \x27%s\x27 AND threat_dst_ip = \x27%s\x27 AND date = \x27%s\x27;\n",$1,$2,$3,$4}' >> $tmpSQL
+  cat $snort_csv | sed 's/, /,/g' | while IFS=, read -r id desc class priority src dst timestamp; do
+   date=$(date +'%F' -ud "$(echo $timestamp | sed  's/\-/ /g' | sed 's/\//\-/g')" -D '%y-%m-%d %T')
+   echo "INSERT OR IGNORE INTO threat_log ([threat_id],[threat_desc],[threat_class],[threat_priority],[threat_src_ip],[threat_dst_ip],[date],[count]) VALUES (\"$id\",$desc,\"$class\",\"$priority\",\"$src\",\"$dst\",\"$date\",0);" >> $tmpSQL
+   echo "UPDATE threat_log SET count = count + 1 WHERE threat_id = \"$id\" AND threat_src_ip = \"$src\" AND threat_dst_ip = \"$dst\" AND date = \"$date\";" >> $tmpSQL
+  done
   echo "COMMIT;" >> $tmpSQL
 
   # log out the processed nodes
   threat_count=$(wc -l $snort_csv|cut -f1 -d' ')
   Say "Processed $threat_count threat records..."
 
-  #echo "Removing threat lines from log file..."
-  sed -i '/,/d' $snort_csv
-
-  # HUP to restart logs
-  /opt/etc/init.d/S81Snort3 restart 2>/dev/null
+  echo "Removing threat lines from log file..."
+  echo -n "" > $snort_csv
 
   echo "Running SQLite to import new reply records..."
   sqlite3 $dbLogFile < $tmpSQL

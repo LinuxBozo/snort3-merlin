@@ -22,7 +22,7 @@
 -- HOME_NET and EXTERNAL_NET must be set now
 -- setup the network addresses you are protecting
 -- we set HOME_NET and EXTERNAL_NET here or via an included file
-HOME_NET = [[HOME_NET/16]]
+HOME_NET = SET
 
 -- set up the external network addresses.
 -- (leave as "any" in most situations)

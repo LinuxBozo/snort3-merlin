@@ -2,7 +2,7 @@
 ##
 ## snort_stats.sh
 ##
-## Based on suricata_status by @juched 
+## Based on suricata_status by @juched
 ## Generate Stats for GUI tab
 ## with credit to @JackYaz for his shared scripts
 ## v1.0 - initial stats
@@ -409,8 +409,10 @@ case "$1" in
 	generate)
 		if [ -z "$2" ] && [ -z "$3" ]; then
 			Generate_SnortStats
+			sh /jffs/addons/snort/snort_log.sh
 		elif [ "$2" = "start" ] && [ "$3" = "$SCRIPT_NAME_LOWER" ]; then
 			Generate_SnortStats
+			sh /jffs/addons/snort/snort_log.sh
 		fi
 		exit 0
 	;;
